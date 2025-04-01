@@ -1,15 +1,20 @@
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
+from django.urls import reverse
 
 
 class Category(MPTTModel):
     name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=255, verbose_name='URL категории', blank=True)
+    description = models.TextField(verbose_name='Описание категории', max_length=300, blank=True)
     parent = TreeForeignKey(
         'self',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='children'
+        db_index=True,
+        related_name='children',
+        verbose_name='Родительская категория'
     )
 
     class MPTTMeta:
@@ -19,6 +24,9 @@ class Category(MPTTModel):
         db_table = 'dev_category'
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+
+    def get_absolute_url(self):
+        return reverse('template_by_category', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.name
