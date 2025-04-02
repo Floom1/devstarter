@@ -1,0 +1,39 @@
+{% load mptt_tags %}
+<div class="card">
+    <div class="card-header">
+        Категории
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            {% recursetree categories %}
+                <li class="list-group-item">
+                    <a href="{{ node.get_absolute_url }}">{{ node.name }}</a>
+                    {% if not node.is_leaf_node %}
+                        <ul class="list-group">
+                            {{ children }}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endrecursetree %}
+        </ul>
+    </div>
+</div>
+
+
+
+<!-- <div class="card">
+    <div class="card-header">
+        Категории
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            {% for category in categories %}
+            <li class="list-group-item">
+                <a href="{{ category.get_absolute_url }}">{{ category.name }}</a>
+            </li>
+            {% empty %}
+                <li class="list-group-item">Категорий пока нет.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div> -->
