@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 
 
 class TemplateListView(ListView):
-    model = Template
+    model = Template # {% url 'download_template' template.id %} !!!!!
     template_name = 'templates_app/templates.html'
     context_object_name = 'templates'
     paginate_by = 4

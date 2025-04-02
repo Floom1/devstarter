@@ -21,9 +21,9 @@
                     <th scope="row">{{ forloop.counter }}</th>
                     <td>{{ template.name }}</td>
                     <td>{{ template.description|truncatewords:10 }}</td>
-                    <td>{{ template.category }}</td>
+                    <td><a href="{{ template.category.get_absolute_url }}" class="btn btn-primary btn-sm">{{ template.category }}</a></td>
                     <td>
-                        <a href="{% url 'download_template' template.id %}" class="btn btn-primary btn-sm">Скачать</a>
+                        <a href="" class="btn btn-primary btn-sm">Скачать</a>
                     </td>
                 </tr>
                 {% endfor %}

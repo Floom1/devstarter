@@ -26,7 +26,7 @@ class Category(MPTTModel):
         verbose_name_plural = 'Категории'
 
     def get_absolute_url(self):
-        return reverse('template_by_category', kwargs={'slug': self.slug})
+        return reverse('category_templates', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.name
