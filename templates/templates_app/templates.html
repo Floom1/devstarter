@@ -23,7 +23,7 @@
                     <td>{{ template.description|truncatewords:10 }}</td>
                     <td><a href="{{ template.category.get_absolute_url }}" class="btn btn-primary btn-sm">{{ template.category }}</a></td>
                     <td>
-                        <a href="" class="btn btn-primary btn-sm">Скачать</a>
+                        <a href="{% url 'download_template' template.id %}" class="btn btn-primary btn-sm">Скачать</a>
                     </td>
                 </tr>
                 {% endfor %}

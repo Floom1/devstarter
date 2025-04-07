@@ -52,7 +52,7 @@ class Template(models.Model):
     custom = TemplateManager()
 
     def __str__(self):
-        return self.name
+        return f"{self.file}"
 
     class Meta:
         db_table = 'dev_template'
