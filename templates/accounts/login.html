@@ -1,0 +1,25 @@
+{% extends 'main.html' %}
+{% block title %} Login {% endblock %}
+{% block content %}
+    <h2> Login </h2>
+    {% if form.errors %}
+        <div class="container d-flex allign-items-center justify-content-center">
+            <div class="alert alert-warning alert-dismissible fade show w-50 d-block" role="alert">
+                {% for key, value in form.errors.items %}
+                    <string>{{ value }}</string>
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endif %}
+    <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm btn-block">SignUp</a>
+    <a href="{% url 'social:begin' 'github' %}" class="btn btn-outline-primary btn-sm btn-block">Log In with GitHub</a>
+    <br>
+    <form method="post" class="form">
+        {{ form.username }}
+        {{ form.password }}
+        <div class="mb-1">Remember me: {{form.remember_me }}</div>
+        {% csrf_token %}
+        <input type="submit" class="btn btn-primary btn-lg" value="Login">
+    </form>
+{% endblock %}

@@ -130,3 +130,6 @@ GitHub.sublime-settings
 .history
 apps/templates_app/migrations/0001_initial.py
 apps/templates_app/migrations/0002_category_description_category_slug_and_more.py
+apps/accounts/migrations/0002_profile_github_token.py
+apps/accounts/migrations/
+.gitignore
