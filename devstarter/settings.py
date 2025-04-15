@@ -16,7 +16,6 @@ INTERNAL_IPS = [
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -24,6 +23,12 @@ INSTALLED_APPS = [
     'mptt',
     'apps.templates_app',
     'django_mptt_admin',
+    'social_django',
+    'django.contrib.auth',
+    'apps.accounts',
+
+
+
 ]
 
 MIDDLEWARE = [
@@ -49,6 +54,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
+                'apps.templates_app.context_processors.add_categories',
+                'apps.templates_app.context_processors.sidebar_context',
             ],
         },
     },
@@ -98,3 +107,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = (BASE_DIR / 'media')
+
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+
+SOCIAL_AUTH_GITHUB_KEY = 'Ov23li1rQNFRh45JbrcO'
+SOCIAL_AUTH_GITHUB_SECRET = '860ead9ffd4b4ac44dd242dd02979ade0f94522d'
+
+
+LOGIN_REDIRECT_URL = '/category/python'
