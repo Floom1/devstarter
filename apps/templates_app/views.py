@@ -33,6 +33,20 @@ class TemplateListView(ListView):
         return context
 
 
+class CategoryListView(ListView):
+    model = Category
+    template_name = 'templates_app/category.html'
+    context_object_name = 'categories'
+    # paginate_by = 1
+
+    def get_queryset(self):
+        return Category.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Категории'
+        context['show_sidebar'] = False
+        return context
 
 
 def download_template(request, id):

@@ -1,0 +1,33 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="container d-flex align-items-center justify-content-center mb-4">
+        <h1>Добро пожаловать в DevStarter,
+            {% if user.is_authenticated %}
+                {{ user.username }}!
+            {% else %}
+                если вы хотите пользоваться DevStarter в полной мере —
+                зарегистрируйтесь через <a href="{% url 'social:begin' 'github' %}">GitHub</a>!
+            {% endif %}
+        </h1>
+    </div>
+
+
+    <div class="row">
+        {% for category in categories %}
+            <div class="col-md-3 mb-3">
+                <div class="card" style="width: 100%;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="card-text">{{ category.description|default:"Описание отсутствует" }}</p>
+                        <a href="{% url 'category_templates' slug=category.slug %}" class="btn btn-primary">
+                            К шаблонам
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from django.urls import reverse
-
+from django.contrib.auth.models import User
 
 class Category(MPTTModel):
     name = models.CharField(max_length=100)
