@@ -1,4 +1,5 @@
 {% extends 'main.html' %}
+{% load static %}
 
 {% block content %}
 <div class="card mb-4 border-1 nth-shadow">
@@ -6,16 +7,31 @@
         <div class="card-title nth-card-title">
             <h3>Создание репозитория</h3>
         </div>
-        <form method="post" enctype="multipart-form-data">
+        <!-- Прелоадер (скрыт по умолчанию) -->
+        <div id="loader" style="display:none; text-align:center;">
+            <p>Загрузка... Пожалуйста, подождите.</p>
+        </div>
+        <form id="repo-form" method="post">
             {% csrf_token %}
             {{ form.as_p }}
             {% if error %}
                 <p class="text-danger">{{ error }}</p>
             {% endif %}
-            <div class="d-grid gap=3 d-md-block mt-2">
-                <button type="submit" class="btn ntb-dark">Создать Репозиторий</button>
+            <div class="d-grid gap-3 d-md-block mt-2">
+                <button type="button" id="submit-btn" class="btn ntb-dark">Создать Репозиторий</button>
             </div>
         </form>
     </div>
 </div>
+
+<!-- JavaScript для управления прелоадером и отправкой формы -->
+<script>
+    document.getElementById('submit-btn').addEventListener('click', function() {
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('repo-form').style.display = 'none';
+        setTimeout(function() {
+            document.getElementById('repo-form').submit();
+        }, 100); // 100 мс задержки
+    });
+</script>
 {% endblock %}
