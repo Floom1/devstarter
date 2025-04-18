@@ -24,6 +24,9 @@
                     <td><a href="{{ template.category.get_absolute_url }}" class="btn btn-primary btn-sm">{{ template.category }}</a></td>
                     <td>
                         <a href="{% url 'download_template' template.id %}" class="btn btn-primary btn-sm">Скачать</a>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'create-repo' template.id %}" class="btn btn-success btn-sm">Создать репозиторий</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
