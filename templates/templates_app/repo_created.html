@@ -1,0 +1,10 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h3>Репозиторий успешно создан!</h3>
+        <p>Перейдите к вашему репозиторию: <a href="{{ repo_url }}">{{ repo_url }}</a></p>
+    </div>
+</div>
+{% endblock %}
