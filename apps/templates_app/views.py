@@ -1,4 +1,5 @@
 import base64
+import shutil
 from django.db import transaction
 import requests
 from django.http import JsonResponse
@@ -14,6 +15,7 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from apps.services.upload_zip import extract_zip, upload_file_to_repo
 from apps.services.zip_utils import create_zip_from_dir
+from apps.services.template_processing import process_template
 
 
 class TemplateListView(ListView):
@@ -118,6 +120,7 @@ class RepoCreateView(LoginRequiredMixin, View):
         form = RepoCreateForm(request.POST)
         if form.is_valid():
             repo_name = form.cleaned_data['repo_name']
+            project_name = form.cleaned_data['project_name']
             template = get_object_or_404(Template, id=template_id)
             token = request.user.profile.github_token
             owner = request.user.social_auth.get(provider='github').extra_data['login']
@@ -127,7 +130,7 @@ class RepoCreateView(LoginRequiredMixin, View):
                 "Accept": "application/vnd.github.v3+json"
             }
 
-            # Проверка доступности имени
+            # Проверка доступности имени репозитория
             check_url = f"https://api.github.com/repos/{owner}/{repo_name}"
             check_response = requests.get(check_url, headers=headers)
 
@@ -145,7 +148,7 @@ class RepoCreateView(LoginRequiredMixin, View):
             # Создание репозитория
             data = {
                 "name": repo_name,
-                "description": f"Шаблон: {template.description}", # Изменить
+                "description": f"Шаблон: {template.description}",
                 "private": False,
             }
             response = requests.post(
@@ -159,19 +162,45 @@ class RepoCreateView(LoginRequiredMixin, View):
 
             repo_url = response.json()["html_url"]
 
+            # Путь к исходной папке шаблона
             template_dir = os.path.join(settings.MEDIA_ROOT, template.template_dir)
 
             if not os.path.exists(template_dir):
                 return JsonResponse({"error": "Папка шаблона не найдена."}, status=400)
 
-            for root, _, files in os.walk(template_dir):
+            # Создаём временную папку для обработанных файлов
+            temp_output_dir = os.path.join(settings.MEDIA_ROOT, 'temp', f"processed_{template.name}_{template_id}")
+            os.makedirs(temp_output_dir, exist_ok=True)
+
+            # Заменяем переменные в файлах
+            variables = {
+                'project_name': project_name,
+            }
+            try:
+                process_template(template_dir, temp_output_dir, variables)
+            except Exception as e:
+                shutil.rmtree(temp_output_dir, ignore_errors=True)
+                return JsonResponse({"error": f"Ошибка обработки шаблона: {str(e)}"}, status=400)
+
+            # Логируем содержимое temp_output_dir для отладки
+            print(f"Содержимое {temp_output_dir}:")
+            for root, _, files in os.walk(temp_output_dir):
+                for file in files:
+                    print(f" - {os.path.join(root, file)}")
+
+            # Загружаем обработанные файлы на GitHub
+            for root, _, files in os.walk(temp_output_dir):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    relative_path = os.path.relpath(file_path, template_dir).replace('\\', '/')
+                    relative_path = os.path.relpath(file_path, temp_output_dir).replace('\\', '/')
                     print(f"Загрузка {file_path} как {relative_path}")
                     upload_response = upload_file_to_repo(owner, repo_name, file_path, relative_path, token)
                     if upload_response.status_code != 201:
+                        shutil.rmtree(temp_output_dir, ignore_errors=True)
                         return JsonResponse({"error": f"Ошибка загрузки файла {file}: {upload_response.json().get('message')}"}, status=400)
+
+            # Удаляем временную папку
+            # shutil.rmtree(temp_output_dir, ignore_errors=True)
 
             return render(request, 'templates_app/repo_created.html', {'repo_url': repo_url})
 
@@ -179,9 +208,6 @@ class RepoCreateView(LoginRequiredMixin, View):
             'form': form,
             'template_id': template_id
         })
-
-
-
 
             # zip_path = template.file.path
 
