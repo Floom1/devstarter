@@ -6,13 +6,14 @@ from django.shortcuts import render
 from django.views.generic import ListView
 from .models import Template, Category
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, FileResponse, HttpResponseRedirect
+from django.http import HttpResponse, FileResponse, HttpResponseRedirect, StreamingHttpResponse
 import os
 from django.conf import settings
 from .forms import RepoCreateForm
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from apps.services.upload_zip import extract_zip, upload_file_to_repo
+from apps.services.zip_utils import create_zip_from_dir
 
 
 class TemplateListView(ListView):
@@ -60,30 +61,44 @@ class CategoryListView(ListView):
 
 def download_template(request, id):
     try:
-        # Получаем объект модели по ID
-        file_m = Template.objects.get(id=id)
+        # Получаем шаблон из базы данных
+        template = Template.objects.get(id=id)
+        template_dir = os.path.join(settings.MEDIA_ROOT, template.template_dir)
 
-        # Проверяем, существует ли файл на сервере
-        file_path = file_m.file.path
-        if os.path.exists(file_path):
-            # Открываем файл для чтения
-            file = open(file_path, 'rb')
+        # Проверяем, существует ли директория шаблона
+        if not os.path.exists(template_dir):
+            return HttpResponse(f"Папка шаблона не найдена: {template_dir}", status=404)
 
-            # Извлекаем оригинальное имя файла
-            filename = os.path.basename(file_m.file.name)
-            print(f"Полный путь: {file_m.file.name}")
-            print(f"Имя файла: {filename}")
+        # Формируем имя ZIP-файла
+        zip_name = f"{template.name.replace(' ', '_').lower()}.zip"
+        zip_path = os.path.join(settings.MEDIA_ROOT, 'temp', zip_name)
 
-            # Создаём ответ с файлом
-            response = FileResponse(file)
-            # Используем filename* с явной кодировкой UTF-8
-            response['Content-Disposition'] = f'attachment; filename*=UTF-8\'\'{filename}'
-            print(f"Заголовок Content-Disposition: {response['Content-Disposition']}")
-            return response
-        else:
-            return HttpResponse(f"Файл не найден: {file_path}", status=404)
+        # Создаём ZIP-архив
+        zip_path = create_zip_from_dir(template_dir, zip_path)
+
+        # Проверяем, создан ли ZIP-файл
+        if not os.path.exists(zip_path):
+            return HttpResponse("Не удалось создать ZIP-архив.", status=500)
+
+        # Используем FileResponse для отправки файла
+        response = FileResponse(
+            open(zip_path, 'rb'),
+            as_attachment=True,
+            filename=zip_name,
+            content_type='application/zip'
+        )
+        return response
+
     except Template.DoesNotExist:
         return HttpResponse("Шаблон не найден", status=404)
+    # finally:
+    #     # Удаляем временный файл, если он существует
+    #     if 'zip_path' in locals() and os.path.exists(zip_path):
+    #         try:
+    #             os.remove(zip_path)
+    #         except PermissionError:
+    #             print(f"Не удалось удалить файл {zip_path}: файл занят другим процессом.")
+
 
 
 class RepoCreateView(LoginRequiredMixin, View):
@@ -143,29 +158,54 @@ class RepoCreateView(LoginRequiredMixin, View):
                 return JsonResponse({"error": response.json().get("message", "Неизвестная ошибка")}, status=400)
 
             repo_url = response.json()["html_url"]
-            zip_path = template.file.path
 
-            temp_dir = extract_zip(zip_path)
-            print(f"Распакованные файлы в {temp_dir}:")
-            for root, dirs, files in os.walk(temp_dir):
-                print(f"Папка: {root}")
-                for file in files:
-                    print(f"Файл: {file}")
+            template_dir = os.path.join(settings.MEDIA_ROOT, template.template_dir)
 
-            for root, _, files in os.walk(temp_dir):
+            if not os.path.exists(template_dir):
+                return JsonResponse({"error": "Папка шаблона не найдена."}, status=400)
+
+            for root, _, files in os.walk(template_dir):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    relative_path = os.path.relpath(file_path, temp_dir)
+                    relative_path = os.path.relpath(file_path, template_dir).replace('\\', '/')
                     print(f"Загрузка {file_path} как {relative_path}")
                     upload_response = upload_file_to_repo(owner, repo_name, file_path, relative_path, token)
-                    print(f"Ответ API: {upload_response.status_code}, {upload_response.json()}")
                     if upload_response.status_code != 201:
-                        import shutil
-                        shutil.rmtree(temp_dir)
                         return JsonResponse({"error": f"Ошибка загрузки файла {file}: {upload_response.json().get('message')}"}, status=400)
-            import shutil
-            shutil.rmtree(temp_dir)
+
             return render(request, 'templates_app/repo_created.html', {'repo_url': repo_url})
+
+        return render(request, self.template_name, {
+            'form': form,
+            'template_id': template_id
+        })
+
+
+
+
+            # zip_path = template.file.path
+
+            # temp_dir = extract_zip(zip_path)
+            # print(f"Распакованные файлы в {temp_dir}:")
+            # for root, dirs, files in os.walk(temp_dir):
+            #     print(f"Папка: {root}")
+            #     for file in files:
+            #         print(f"Файл: {file}")
+
+            # for root, _, files in os.walk(temp_dir):
+            #     for file in files:
+            #         file_path = os.path.join(root, file)
+            #         relative_path = os.path.relpath(file_path, temp_dir)
+            #         print(f"Загрузка {file_path} как {relative_path}")
+            #         upload_response = upload_file_to_repo(owner, repo_name, file_path, relative_path, token)
+            #         print(f"Ответ API: {upload_response.status_code}, {upload_response.json()}")
+            #         if upload_response.status_code != 201:
+            #             import shutil
+            #             shutil.rmtree(temp_dir)
+            #             return JsonResponse({"error": f"Ошибка загрузки файла {file}: {upload_response.json().get('message')}"}, status=400)
+            # import shutil
+            # shutil.rmtree(temp_dir)
+            # return render(request, 'templates_app/repo_created.html', {'repo_url': repo_url})
 
             # with open(file_path, 'rb') as f:
             #     content = base64.b64encode(f.read()).decode('utf-8')
@@ -182,10 +222,10 @@ class RepoCreateView(LoginRequiredMixin, View):
             # else:
             #     return JsonResponse({"error": upload_response.json().get("message", "Ошибка загрузки файла")}, status=400)
 
-        return render(request, self.template_name, {
-            'form': form,
-            'template_id': template_id
-        })
+        # return render(request, self.template_name, {
+        #     'form': form,
+        #     'template_id': template_id
+        # })
 
 
      # def get_context_data(self, **kwargs):

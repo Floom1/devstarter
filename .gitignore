@@ -133,3 +133,4 @@ apps/templates_app/migrations/0002_category_description_category_slug_and_more.p
 apps/accounts/migrations/0002_profile_github_token.py
 apps/accounts/migrations/
 .gitignore
+apps/templates_app/migrations/0003_template_template_dir_alter_template_file.py

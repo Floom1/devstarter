@@ -38,13 +38,10 @@ class TemplateManager(models.Manager):
 
 
 class Template(models.Model):
-    # STATUS_OPTIONS = (
-    #     ('published', 'Опубликовано'),
-    #     ('draft', 'Черновик')
-    # )
     name = models.CharField(max_length=70, verbose_name='Название')
     description = models.TextField(verbose_name='Описание', default='')
-    file = models.FileField(upload_to='templates/', verbose_name='Шаблон')
+    file = models.FileField(upload_to='templates/', verbose_name='Шаблон', blank=True)
+    template_dir = models.CharField(max_length=255, verbose_name='Путь к шаблону', blank=True, default='templates/')
     is_published = models.BooleanField(default=True, verbose_name='Опубликовано')
     category = TreeForeignKey(Category, on_delete=models.CASCADE, verbose_name='Категория')
 
@@ -52,7 +49,7 @@ class Template(models.Model):
     custom = TemplateManager()
 
     def __str__(self):
-        return f"{self.file}"
+        return self.name
 
     class Meta:
         db_table = 'dev_template'
