@@ -24,8 +24,31 @@
     </div>
 </div>
 
-<!-- JavaScript для управления прелоадером и отправкой формы -->
+<!-- JavaScript для управления прелоадером, отправкой формы и видимостью полей CI -->
 <script>
+    // Управление видимостью полей CI
+    document.addEventListener('DOMContentLoaded', function() {
+        const enableCiCheckbox = document.getElementById('enable_ci');
+        const pythonVersionField = document.getElementById('python_version').closest('p');
+        const testCommandField = document.getElementById('test_command').closest('p');
+
+        // Скрыть поля CI по умолчанию
+        pythonVersionField.style.display = 'none';
+        testCommandField.style.display = 'none';
+
+        // Обработчик изменения состояния флажка
+        enableCiCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                pythonVersionField.style.display = 'block';
+                testCommandField.style.display = 'block';
+            } else {
+                pythonVersionField.style.display = 'none';
+                testCommandField.style.display = 'none';
+            }
+        });
+    });
+
+    // Управление прелоадером и отправкой формы
     document.getElementById('submit-btn').addEventListener('click', function() {
         document.getElementById('loader').style.display = 'block';
         document.getElementById('repo-form').style.display = 'none';

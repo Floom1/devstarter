@@ -12,22 +12,18 @@ def extract_zip(zip_path):
         zip_ref.extractall(temp_dir)
     return temp_dir
 
-def upload_file_to_repo(owner, repo_name, file_path, relative_path, token):
+def upload_file_to_repo(owner, repo_name, file_path, relative_path, token, branch='main'):
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json"
     }
     with open(file_path, 'rb') as f:
         content = base64.b64encode(f.read()).decode('utf-8')
-
-    relative_path = relative_path.replace('\\', '/')
-
-    encoded_path = quote(relative_path)
-    upload_url = f"https://api.github.com/repos/{owner}/{repo_name}/contents/{encoded_path}"
-
+    upload_url = f"https://api.github.com/repos/{owner}/{repo_name}/contents/{relative_path}"
     upload_data = {
         "message": f"Добавлен файл {relative_path}",
-        "content": content
+        "content": content,
+        "branch": branch
     }
-    response = requests.put(upload_url, headers=headers, json=upload_data)
+    response = requests.put(upload_url, json=upload_data, headers=headers)
     return response

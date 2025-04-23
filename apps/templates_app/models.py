@@ -42,6 +42,7 @@ class Template(models.Model):
     description = models.TextField(verbose_name='Описание', default='')
     file = models.FileField(upload_to='templates/', verbose_name='Шаблон', blank=True)
     template_dir = models.CharField(max_length=255, verbose_name='Путь к шаблону', blank=True, default='templates/')
+    ci_template = models.TextField(blank=True, help_text="Шаблон ci.yml для GitHub Actions")
     is_published = models.BooleanField(default=True, verbose_name='Опубликовано')
     category = TreeForeignKey(Category, on_delete=models.CASCADE, verbose_name='Категория')
 

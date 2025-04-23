@@ -13,6 +13,7 @@ from django.conf import settings
 from .forms import RepoCreateForm
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.services.utils import generate_ci_yaml
 from apps.services.upload_zip import extract_zip, upload_file_to_repo
 from apps.services.zip_utils import create_zip_from_dir
 from apps.services.template_processing import process_template
@@ -121,6 +122,8 @@ class RepoCreateView(LoginRequiredMixin, View):
         if form.is_valid():
             repo_name = form.cleaned_data['repo_name']
             project_name = form.cleaned_data['project_name']
+            python_version = form.cleaned_data['python_version']
+            test_command = form.cleaned_data['test_command']
             template = get_object_or_404(Template, id=template_id)
             token = request.user.profile.github_token
             owner = request.user.social_auth.get(provider='github').extra_data['login']
@@ -162,6 +165,12 @@ class RepoCreateView(LoginRequiredMixin, View):
 
             repo_url = response.json()["html_url"]
 
+            # Получаем имя ветки по умолчанию
+            repo_info_url = f"https://api.github.com/repos/{owner}/{repo_name}"
+            repo_info = requests.get(repo_info_url, headers=headers).json()
+            default_branch = repo_info['default_branch']
+            print(f"Ветка по умолчанию: {default_branch}")
+
             # Путь к исходной папке шаблона
             template_dir = os.path.join(settings.MEDIA_ROOT, template.template_dir)
 
@@ -182,7 +191,29 @@ class RepoCreateView(LoginRequiredMixin, View):
                 shutil.rmtree(temp_output_dir, ignore_errors=True)
                 return JsonResponse({"error": f"Ошибка обработки шаблона: {str(e)}"}, status=400)
 
-            # Логируем содержимое temp_output_dir для отладки
+            # Генерация и сохранение ci.yml, если заполнены поля CI
+            if python_version and test_command:
+                try:
+                    ci_params = {
+                        'python_version': python_version,
+                        'test_command': test_command,
+                        'node_version': python_version  # Для Node.js
+                    }
+                    ci_yaml = generate_ci_yaml(template, ci_params)
+
+                    # Создаём директорию .github/workflows/ в temp_output_dir
+                    ci_dir = os.path.join(temp_output_dir, '.github', 'workflows')
+                    os.makedirs(ci_dir, exist_ok=True)
+
+                    # Сохраняем ci.yml в temp_output_dir
+                    ci_path = os.path.join(ci_dir, 'ci.yml')
+                    with open(ci_path, 'w', encoding='utf-8') as f:
+                        f.write(ci_yaml)
+                except Exception as e:
+                    print(f"Ошибка генерации ci.yml: {str(e)}")
+                    return JsonResponse({"error": f"Ошибка генерации ci.yml: {str(e)}"}, status=400)
+
+            # Логируем содержимое temp_output_dir
             print(f"Содержимое {temp_output_dir}:")
             for root, _, files in os.walk(temp_output_dir):
                 for file in files:
@@ -193,14 +224,14 @@ class RepoCreateView(LoginRequiredMixin, View):
                 for file in files:
                     file_path = os.path.join(root, file)
                     relative_path = os.path.relpath(file_path, temp_output_dir).replace('\\', '/')
-                    print(f"Загрузка {file_path} как {relative_path}")
-                    upload_response = upload_file_to_repo(owner, repo_name, file_path, relative_path, token)
-                    if upload_response.status_code != 201:
-                        shutil.rmtree(temp_output_dir, ignore_errors=True)
+                    print(f"Загрузка {file_path} как {relative_path} на ветку {default_branch}")
+                    upload_response = upload_file_to_repo(owner, repo_name, file_path, relative_path, token, branch=default_branch)
+                    if upload_response.status_code not in (201, 200):
+                        print(f"Ошибка загрузки файла {file}: {upload_response.json()}")
                         return JsonResponse({"error": f"Ошибка загрузки файла {file}: {upload_response.json().get('message')}"}, status=400)
 
             # Удаляем временную папку
-            # shutil.rmtree(temp_output_dir, ignore_errors=True)
+            shutil.rmtree(temp_output_dir, ignore_errors=True)
 
             return render(request, 'templates_app/repo_created.html', {'repo_url': repo_url})
 
