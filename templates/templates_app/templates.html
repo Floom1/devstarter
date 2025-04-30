@@ -8,7 +8,6 @@
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th scope="col">#</th>
                     <th scope="col">Название</th>
                     <th scope="col">Описание</th>
                     <th scope="col">Категория</th>
@@ -18,7 +17,6 @@
             <tbody>
                 {% for template in templates %}
                 <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
                     <td>{{ template.name }}</td>
                     <td>{{ template.description|truncatewords:10 }}</td>
                     <td><a href="{{ template.category.get_absolute_url }}" class="btn btn-primary btn-sm">{{ template.category }}</a></td>
