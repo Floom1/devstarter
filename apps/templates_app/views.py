@@ -59,6 +59,7 @@ class CategoryListView(ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Категории'
         context['show_sidebar'] = False
+        context['is_home'] = True
         return context
 
 
