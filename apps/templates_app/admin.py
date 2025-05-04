@@ -59,4 +59,4 @@ class TemplateAdminForm(forms.ModelForm):
 @admin.register(Template)
 class TemplateAdmin(admin.ModelAdmin):
     form = TemplateAdminForm
-    list_display = ('name', 'category', 'template_dir')  # Добавляем template_dir в список отображения
+    list_display = ('name', 'category', 'template_dir')

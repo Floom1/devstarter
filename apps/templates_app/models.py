@@ -2,6 +2,8 @@ from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from django.urls import reverse
 from django.contrib.auth.models import User
+from apps.services.utils import unique_slugify
+
 
 class Category(MPTTModel):
     name = models.CharField(max_length=100)
@@ -30,6 +32,11 @@ class Category(MPTTModel):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slugify(self, self.name, '')
+        super().save(*args, **kwargs)
 
 
 class TemplateManager(models.Manager):
