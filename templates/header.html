@@ -12,12 +12,12 @@
             <ul class="navbar-nav ms-auto align-items-center">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link btn btn-outline-light btn-sm mx-1" href="{% url 'users-profile' %}">{{ user.username }}</a>
+                        <a class="nav-link btn btn-outline-secondary btn-sm mx-1" href="{% url 'users-profile' %}">{{ user.username }}</a>
                     </li>
                     <li class="nav-item">
                         <form action="{% url 'logout' %}" method="post">
                             {% csrf_token %}
-                            <a class="nav-link btn btn-outline-light btn-sm mx-1" href="#" onclick="this.parentNode.submit();">Log out</a>
+                            <a class="nav-link btn btn-outline-secondary btn-sm mx-1" href="#" onclick="this.parentNode.submit();">Log out</a>
                         </form>
                     </li>
                 {% else %}
