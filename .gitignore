@@ -137,3 +137,4 @@ apps/accounts/migrations/
 .gitignore
 apps/templates_app/migrations/0003_template_template_dir_alter_template_file.py
 templates/footer_ot.html
+templates/templates_app/templates_otkate.html

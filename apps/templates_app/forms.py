@@ -19,7 +19,7 @@ class RepoCreateForm(forms.Form):
 
     # Флажок для включения CI
     enable_ci = forms.BooleanField(
-        label='Включить CI',
+        label='CI',
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input", "id": "enable_ci"})
     )
