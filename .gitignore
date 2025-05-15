@@ -7,7 +7,7 @@ db.sqlite3
 media
 
 static/
-
+static_collected/
 # Backup files #
 *.bak
 
@@ -138,3 +138,7 @@ apps/accounts/migrations/
 apps/templates_app/migrations/0003_template_template_dir_alter_template_file.py
 templates/footer_ot.html
 templates/templates_app/templates_otkate.html
+test.py
+*.json
+*.zip
+mysite_data.json
