@@ -22,7 +22,7 @@ def profile(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-            messages.success(request, 'Your profile is updated succesfully')
+            messages.success(request, 'Ваш профиль успешно обновлён')
             return redirect(to='users-profile')
     else:
         user_form = UserUpdateForm(instance=request.user)

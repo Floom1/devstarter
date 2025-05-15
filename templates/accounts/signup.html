@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
-{% block title %} Sign Up {% endblock %}
+{% block title %} Вход {% endblock %}
 {% block content %}
-    <h2> Sign Up </h2>
+    <h2> Вход </h2>
     {% if form.errors %}
         <div class="container d-flex allign-itens-center justify-content-center">
             <div class="alert alert-warning alert-dismissible fade show w-50 d-block" role="alert">
@@ -14,14 +14,14 @@
     {% endif %}
     <form method="post">
         {% csrf_token %}
-        Username: {{ form.username }}
+        Ник: {{ form.username }}
         Email: {{ form.email }}
-        First Name: {{ form.first_name }}
-        Last Name: {{ form.last_name }}
-        Password: {{ form.password1 }}
+        Имя: {{ form.first_name }}
+        Фамилия: {{ form.last_name }}
+        Пароль: {{ form.password1 }}
         {{ form.errors.password }}
-        Confirm Password: {{ form.password2 }}
-        <button type="submit" class="btn btn-primary btn-lg">Sign Up</button>
+        Подтвердите пароль: {{ form.password2 }}
+        <button type="submit" class="btn btn-primary btn-lg">Войти</button>
     </form>
-    <a href="{% url 'login' %}">Have an account? Go to Log In</a>
+    <a href="{% url 'login' %}">Есть аккаунт? Перейдите ко входу</a>
 {% endblock %}

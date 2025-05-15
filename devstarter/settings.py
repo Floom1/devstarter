@@ -1,13 +1,22 @@
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-xtzo$&n68xcz*m=b_awlk(r14u-@rbyda)#zp(qbg7m7x^@qhj'
+SECRET_KEY = str(os.getenv('SECRET_KEY'))
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+if os.getenv('ALLOWED_HOSTS'):
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').replace(' ', '').split(',')
+else:
+    ALLOWED_HOSTS = []
 
+if os.getenv('CSRF_TRUSTED_ORIGINS'):
+    CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS').replace(' ', '').split(',')
 
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -26,6 +35,7 @@ INSTALLED_APPS = [
     'social_django',
     'django.contrib.auth',
     'apps.accounts',
+    'django.contrib.postgres',
 
 
 
@@ -66,12 +76,34 @@ TEMPLATES = [
 WSGI_APPLICATION = 'devstarter.wsgi.application'
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'devstarter',
+#         'USER': 'devstarter',
+#         'PASSWORD': 'Chayok_13',
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASS'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -117,8 +149,8 @@ AUTHENTICATION_BACKENDS = (
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
-SOCIAL_AUTH_GITHUB_KEY = 'Ov23li1rQNFRh45JbrcO'
-SOCIAL_AUTH_GITHUB_SECRET = '860ead9ffd4b4ac44dd242dd02979ade0f94522d'
+SOCIAL_AUTH_GITHUB_KEY = str(os.getenv('GITHUB_KEY'))
+SOCIAL_AUTH_GITHUB_SECRET = str(os.getenv('GITHUB_SECRET'))
 SOCIAL_AUTH_GITHUB_SCOPE = ['repo', 'workflow']
 
 LOGIN_REDIRECT_URL = '/'

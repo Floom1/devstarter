@@ -1,6 +1,6 @@
 {% extends "main.html" %}
 
-{% block title %}Profile Page{% endblock %}
+{% block title %}Профиль{% endblock %}
 
 {% block content %}
     <div>
@@ -22,7 +22,7 @@
             <div>
                 <div>
                     <div>
-                        <label>Username:</label>
+                        <label>Ник:</label>
                         {{ user_form.username }}
                         <hr>
                         <label>Email:</label>
@@ -31,16 +31,16 @@
                     <hr>
                     <div><a href="{% url 'password_change' %}">Change Password</a>
                         <hr>
-                        <label>Change Avatar:</label>
+                        <label>Сменить аватар:</label>
                         {{ profile_form.avatar }}
                     </div>
                     <hr>
-                    <label>Bio:</label> {{ profile_form.bio }}
+                    <label>О себе:</label> {{ profile_form.bio }}
                 </div>
             </div>
             <br><br>
-            <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
-            <button type="reset" class="btn btn-primary btn-lg">Reset</button>
+            <button type="submit" class="btn btn-primary btn-lg">Соранить изменения</button>
+            <button type="reset" class="btn btn-primary btn-lg">Сбросить</button>
         </form>
     </div>
 {% endblock %}

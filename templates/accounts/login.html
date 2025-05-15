@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
-{% block title %} Login {% endblock %}
+{% block title %} Вход {% endblock %}
 {% block content %}
-    <h2> Login </h2>
+    <h2> Вход </h2>
     {% if form.errors %}
         <div class="container d-flex allign-items-center justify-content-center">
             <div class="alert alert-warning alert-dismissible fade show w-50 d-block" role="alert">
@@ -12,13 +12,13 @@
             </div>
         </div>
     {% endif %}
-    <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm btn-block">SignUp</a>
-    <a href="{% url 'social:begin' 'github' %}" class="btn btn-outline-primary btn-sm btn-block">Log In with GitHub</a>
+    <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm btn-block">Войти</a>
+    <a href="{% url 'social:begin' 'github' %}" class="btn btn-outline-primary btn-sm btn-block">Войти через GitHub</a>
     <br>
     <form method="post" class="form">
         {{ form.username }}
         {{ form.password }}
-        <div class="mb-1">Remember me: {{form.remember_me }}</div>
+        <div class="mb-1">Запомнить меня: {{form.remember_me }}</div>
         {% csrf_token %}
         <input type="submit" class="btn btn-primary btn-lg" value="Login">
     </form>
